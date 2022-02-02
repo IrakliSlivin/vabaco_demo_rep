@@ -32,7 +32,8 @@ class MedicamentDeliveryPriceService
       # Always use default price
       delivery_price = delivery_company_price.default_price
     else
-      delivery_price = price_within_delivery(delivery_company_price)
+      # Price based on distance
+      delivery_price = price_within_delivery(delivery_company_price, provider_price)
     end
 
     {
@@ -41,7 +42,7 @@ class MedicamentDeliveryPriceService
     }
   end
 
-  def price_within_delivery(delivery_company_price)
+  def price_within_delivery(delivery_company_price, provider_price)
     price_in_range = DeliveryDistance.find_price(delivery_company_price.id, distance)
 
     if price_in_range
