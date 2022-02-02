@@ -59,14 +59,13 @@ class MedicamentDeliveryPriceService
   end
 
   def distance
-    customer_addresses = ActiveRecord::Base::sanitize_sql_array ['LEFT JOIN customer_addresses on customer_addresses.id = :id',
-                                                                 {id: @params[:delivery_location_id]}]
-
-    Pharmacy.select('ROUND( (MIN((point(coalesce(pharmacy.longitude, 0),
-                              coalesce(pharmacy.latitude,0)) <@>
+    Pharmacy.select('ROUND( (MIN((point(coalesce(pharmacies.longitude, 0),
+                              coalesce(pharmacies.latitude,0)) <@>
                               point(coalesce(customer_addresses.longitude, 0),
                               coalesce(customer_addresses.latitude, 0)))) * 1.60934)::decimal, 2) as distance')
-            .where('pharmacy.id': @params[:pharmacy_id])
-            .joins(customer_addresses).first.distance
+            .joins('LEFT JOIN customer_addresses on customer_addresses.city_id = pharmacies.city_id')
+            .where('pharmacies.id': @params[:pharmacy_id])
+            .where('customer_addresses.id': @params[:delivery_location_id])
+            .first.distance
   end
 end
