@@ -32,18 +32,7 @@ class MedicamentDeliveryPriceService
       # Always use default price
       delivery_price = delivery_company_price.default_price
     else
-      price_in_range = DeliveryDistance.find_price(delivery_company_price.id, distance)
-
-      if price_in_range
-        # Delivery is at set distance
-        delivery_price = price_in_range.price
-      elsif distance <= delivery_company_price.distance_limit_for_price
-        # Delivery is close, set default price
-        delivery_price = delivery_company_price.default_price
-      else
-        # Delivery is far away, set maximum between prices
-        delivery_price = [provider_price, delivery_company_price.default_price].max
-      end
+      delivery_price = price_within_delivery(delivery_company_price)
     end
 
     {
@@ -52,10 +41,19 @@ class MedicamentDeliveryPriceService
     }
   end
 
-  def additional_fee(delivery_company_price)
-    return unless @params[:medication_price] < delivery_company_price.minimum_medication_price
+  def price_within_delivery(delivery_company_price)
+    price_in_range = DeliveryDistance.find_price(delivery_company_price.id, distance)
 
-    (delivery_company_price.minimum_medication_price - @params[:medication_price]).round(2)
+    if price_in_range
+      # Delivery is at set distance
+      price_in_range.price
+    elsif distance <= delivery_company_price.distance_limit_for_price
+      # Delivery is close, set default price
+      delivery_company_price.default_price
+    else
+      # Delivery is far away, set maximum between prices
+      [provider_price, delivery_company_price.default_price].max
+    end
   end
 
   def distance
@@ -67,5 +65,11 @@ class MedicamentDeliveryPriceService
             .where('pharmacies.id': @params[:pharmacy_id])
             .where('customer_addresses.id': @params[:delivery_location_id])
             .first.distance
+  end
+
+  def additional_fee(delivery_company_price)
+    return unless @params[:medication_price] < delivery_company_price.minimum_medication_price
+
+    (delivery_company_price.minimum_medication_price - @params[:medication_price]).round(2)
   end
 end
