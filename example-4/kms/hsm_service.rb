@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class HsmService
 
   attr_accessor :errors, :status_code, :params, :user_key, :encrypted_data, :decrypted_data, :key_id

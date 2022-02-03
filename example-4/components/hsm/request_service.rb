@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rest-client'
 module Components
   module Hsm
@@ -32,7 +34,11 @@ module Components
 
       private
       def hsm_service_request
-        response = RestClient::Request.execute(method: :post, url: @url + @service.to_s, timeout: HSM_TIMEOUT, headers: @headers, payload: @payload)
+        response = RestClient::Request.execute(method: :post,
+                                               url: @url + @service.to_s,
+                                               timeout: HSM_TIMEOUT,
+                                               headers: @headers,
+                                               payload: @payload)
         @result = JSON.parse(response.body).deep_symbolize_keys
       end
 

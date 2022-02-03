@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Encryption
   module Encryptable extend ActiveSupport::Concern
 
